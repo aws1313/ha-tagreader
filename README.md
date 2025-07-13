@@ -3,10 +3,10 @@
 [![GitHub release](https://img.shields.io/github/release/adonno/tagreader.svg)](https://GitHub.com/adonno/tagreader/releases/)
 
 # Tag Reader for Home Assistant
+> [!NOTE]
+> This fork adds status leds for alarmo and the integration of an DFPlayer mini to play voice messages. WIP!
 
-The tag reader is a simple to build/use NFC tag reader, specially created for [Home Assistant](https://www.home-assistant.io). It is using a D1 mini ESP 8266 and the PN532 NFC module. The firmware is built using [ESPhome](https://www.esphome.io).
-
-> I am selling a pre-built version, a DIY version (assembly required), or just the case (use with own components). Check it out on [my website](https://adonno-crafts.myshopify.com/).
+The tag reader is a simple to build/use NFC tag reader, specially created for [Home Assistant](https://www.home-assistant.io). It is using a D1 mini ESP 8266 and the PN532 NFC module as well as the DFPlayer Mini. The firmware is built using [ESPhome](https://www.esphome.io).
 
 ![Photos of the final product](docs/cases.jpg)
 
@@ -14,25 +14,22 @@ The tag reader is a simple to build/use NFC tag reader, specially created for [H
 
 To build your own tag reader, you need the following components:
 
- - [ESP8266 D1 Mini](https://s.click.aliexpress.com/e/_d8l72oB)  
- - [PN532 NFC Reader](https://s.click.aliexpress.com/e/_dZNORIJ)
- - [WS2812](https://s.click.aliexpress.com/e/_d82GRqr)
- - [Buzzer](https://s.click.aliexpress.com/e/_dZ5F5yj)
+ - ESP8266 D1 Mini
+ - PN532 NFC Reader
+ - WS2812
+ - Buzzer
 
 The 3D models for the case are [here](STLs).
 
-~~**WARNING** regarding AZdelivery D1. We have had several users contacting us with different issues, we don't recommend using these boards and won't provide support for them.~~  
-Recent reports suggest more clones of the D1 are now working as expected. This has been verified on an AZdelivery D1.
-
 ### Connecting the components
 
-![Photo of schematics](Schematics/tag_reader_schematics_v3.2.png)
+![Photo of schematics](Schematics/tagreader_fork_bb.png)
 
 There are not too many components to connect, but it does require soldering. You will need the following:
 
-- [Solder](https://s.click.aliexpress.com/e/_dT3S62j)
-- [Soldering iron with a fairly thin tip](https://s.click.aliexpress.com/e/_dXaI6nz)
-- [About 40cm of thin wire (at least 5 different colors)](https://s.click.aliexpress.com/e/_dZvoYoB)
+- Solder
+- Soldering iron with a fairly thin tip
+- About 40cm of thin wire (at least 5 different colors)
 
 
 Also, make sure that you have set the switches on the PN532 to the following:
