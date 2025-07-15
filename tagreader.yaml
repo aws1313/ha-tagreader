@@ -10,7 +10,7 @@ wifi:
 captive_portal:
 
 dashboard_import:
-  package_import_url: github://adonno/tagreader/tagreader.yaml
+  package_import_url: github://aws1313/ha-tagreader/tagreader.yaml
 
 improv_serial:
 
@@ -32,7 +32,7 @@ esphome:
   # This will allow for (future) project identification,
   # configuration and updates.
   project:
-    name: adonno.tag_reader
+    name: aws1313.tag_reader
     version: dev
 # If buzzer is enabled, notify on api connection success
   on_boot:
@@ -43,11 +43,8 @@ esphome:
     - logger.log: API is connected!
     - rtttl.play: "success:d=24,o=5,b=100:c,g,b"
     - light.turn_on:
-        id: activity_led
+        id: power_led
         brightness: 100%
-        red: 0%
-        green: 0%
-        blue: 100%
         flash_length: 500ms
     - switch.turn_on: buzzer_enabled
     - switch.turn_on: led_enabled
@@ -79,11 +76,12 @@ button:
     on_press:
       then:
       - light.turn_on:
-          id: activity_led
-          brightness: 100%
-          red: 100%
-          green: 0%
-          blue: 100%
+        id: power_led
+        brightness: 100%
+        flash_length: 500ms
+      - light.turn_on:
+        id: alarm_led
+        brightness: 100%
       - lambda: |-
           static const char alphanum[] = "0123456789abcdef";
           std::string uri = "https://www.home-assistant.io/tag/";
@@ -106,7 +104,7 @@ button:
           not:
             pn532.is_writing:
       - light.turn_off:
-          id: activity_led
+          id: alarm_led
       - rtttl.play: "write:d=24,o=5,b=100:b,b"
   - platform: template
     name: Clean Tag
@@ -115,18 +113,15 @@ button:
     on_press:
       then:
       - light.turn_on:
-          id: activity_led
+          id: alarm_led
           brightness: 100%
-          red: 100%
-          green: 64.7%
-          blue: 0%
       - lambda: 'id(pn532_board).clean_mode();'
       - rtttl.play: "write:d=24,o=5,b=100:b"
       - wait_until:
           not:
             pn532.is_writing:
       - light.turn_off:
-          id: activity_led
+          id: alarm_led
       - rtttl.play: "write:d=24,o=5,b=100:b,b"
   - platform: template
     name: Cancel writing
@@ -136,7 +131,7 @@ button:
       then:
       - lambda: 'id(pn532_board).read_mode();'
       - light.turn_off:
-          id: activity_led
+          id: alarm_led
       - rtttl.play: "write:d=24,o=5,b=100:b,b"
 
   - platform: restart
@@ -169,11 +164,8 @@ api:
       tag_id: string
     then:
     - light.turn_on:
-        id: activity_led
+        id: alarm_led
         brightness: 100%
-        red: 100%
-        green: 0%
-        blue: 0%
     - lambda: |-
         auto message = new nfc::NdefMessage();
         std::string uri = "https://www.home-assistant.io/tag/";
@@ -185,7 +177,7 @@ api:
         not:
           pn532.is_writing:
     - light.turn_off:
-        id: activity_led
+        id: alarm_led
     - rtttl.play: "write:d=24,o=5,b=100:b,b"
 
   - service: write_music_tag
@@ -194,11 +186,8 @@ api:
       music_info: string
     then:
     - light.turn_on:
-        id: activity_led
+        id: alarm_led
         brightness: 100%
-        red: 100%
-        green: 0%
-        blue: 0%
     - lambda: |-
         auto message = new nfc::NdefMessage();
         std::string uri = "";
@@ -217,7 +206,7 @@ api:
         not:
           pn532.is_writing:
     - light.turn_off:
-        id: activity_led
+        id: alarm_led
     - rtttl.play: "write:d=24,o=5,b=100:b,b"
 
 # Enable OTA upgrade
@@ -245,11 +234,8 @@ pn532_i2c:
           switch.is_on: led_enabled
         then:
         - light.turn_on:
-            id: activity_led
+            id: power_led
             brightness: 100%
-            red: 0%
-            green: 100%
-            blue: 0%
             flash_length: 500ms
 
     - delay: 0.15s #to fix slow component
@@ -396,14 +382,42 @@ text_sensor:
 rtttl:
   output: buzzer
 
-# Configure LED
+# Configure POWER LED
+output:
+- platform: esp8266_pwm
+  pin: D6
+  id: power_led_pwm
+
 light:
-- platform: neopixelbus
-  variant: WS2812
-  pin: D8
-  num_leds: 1
-  flash_transition_length: 500ms
-  type: GRB
-  id: activity_led
-  name: "${friendly_name} LED"
-  restore_mode: ALWAYS_OFF
+- platform: monochromatic
+  name: "${friendly_name} Power LED"
+  id: power_led
+  output: power_led_pwm
+
+# Configure ALARM LED
+
+output:
+- platform: esp8266_pwm
+  pin: D5
+  id: alarm_led_pwm
+
+light:
+- platform: monochromatic
+  name: "${friendly_name} ALARM LED"
+  id: alarm_led
+  output: alarm_led_pwm
+
+# dfplayer with speaker
+uart:
+  tx_pin: GPIO0
+  rx_pin: GPIO2
+  baud_rate: 9600
+
+dfplayer:
+  id: dfplayer
+  on_error:
+    then:
+    - light.turn_on:
+        id: alarm_led
+        brightness: 100%
+        flash_length: 500ms

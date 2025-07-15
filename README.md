@@ -1,7 +1,3 @@
-<a href="https://www.buymeacoffee.com/adonno" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
-[![Discord](https://img.shields.io/discord/755394229944975380)](https://discord.gg/4SDcaRS)
-[![GitHub release](https://img.shields.io/github/release/adonno/tagreader.svg)](https://GitHub.com/adonno/tagreader/releases/)
-
 # Tag Reader for Home Assistant
 > [!NOTE]
 > This fork adds status leds for alarmo and the integration of an DFPlayer mini to play voice messages. WIP!
@@ -16,8 +12,10 @@ To build your own tag reader, you need the following components:
 
  - ESP8266 D1 Mini
  - PN532 NFC Reader
- - WS2812
+ - LED (+ resistors)
  - Buzzer
+ - DFPlayer Mini
+ - external speaker
 
 The 3D models for the case are [here](STLs).
 
