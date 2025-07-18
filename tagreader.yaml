@@ -395,6 +395,19 @@ text_sensor:
       name: "${friendly_name} Connected SSID"
       icon: mdi:wifi-strength-2
       entity_category: diagnostic
+  - platform: homeassistant
+    id: alarm_state
+    entity_id: alarm_control_panel.alarmo
+    on_value:
+      then:
+        - script.execute: update_state
+
+script:
+  - id: update_state
+    then:
+      - lambda: |-
+          auto state = id(alarm_state).state;
+
 
 # Define buzzer as output for RTTTL
 rtttl:
