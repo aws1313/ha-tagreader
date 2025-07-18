@@ -261,57 +261,12 @@ pn532_i2c:
             std::string payload = record->get_payload();
             std::string type = record->get_type();
             size_t hass = payload.find("https://www.home-assistant.io/tag/");
-            size_t applemusic = payload.find("https://music.apple.com");
-            size_t spotify = payload.find("https://open.spotify.com");
-            size_t sonos = payload.find("sonos-2://");
-
-            size_t mass_deezer = payload.find("deezer://");
-            size_t mass_filesystem_local = payload.find("filesystem_local://");
-            size_t mass_filesystem_smb = payload.find("filesystem_smb://");
-            size_t mass_plex = payload.find("plex://");
-            size_t mass_qobuz = payload.find("qobuz://");
-            size_t mass_radiobrowser = payload.find("radiobrowser://");
-            size_t mass_soundcloud = payload.find("soundcloud://");
-            size_t mass_spotify = payload.find("spotify://");
-            size_t mass_tidal = payload.find("tidal://");
-            size_t mass_tunein = payload.find("tunein://");
-            size_t mass_ytmusic = payload.find("ytmusic://");
 
             if (type == "U" and hass != std::string::npos ) {
               ESP_LOGD("tagreader", "Found Home Assistant tag NDEF");
               id(source)="hass";
               id(url)=payload;
               id(info)=payload.substr(hass + 34);
-            }
-            else if (type == "U" and applemusic != std::string::npos ) {
-              ESP_LOGD("tagreader", "Found Apple Music tag NDEF");
-              id(source)="amusic";
-              id(url)=payload;
-            }
-            else if (type == "U" and spotify != std::string::npos ) {
-              ESP_LOGD("tagreader", "Found Spotify tag NDEF");
-              id(source)="spotify";
-              id(url)=payload;
-            }
-            else if (type == "U" and sonos != std::string::npos ) {
-              ESP_LOGD("tagreader", "Found Sonos app tag NDEF");
-              id(source)="sonos";
-              id(url)=payload;
-            }
-            else if (type == "U" && (mass_deezer != std::string::npos ||
-                    mass_filesystem_local != std::string::npos ||
-                    mass_filesystem_smb != std::string::npos ||
-                    mass_plex != std::string::npos ||
-                    mass_qobuz != std::string::npos ||
-                    mass_radiobrowser != std::string::npos ||
-                    mass_soundcloud != std::string::npos ||
-                    mass_spotify != std::string::npos ||
-                    mass_tidal != std::string::npos ||
-                    mass_tunein != std::string::npos ||
-                    mass_ytmusic != std::string::npos)) {
-              ESP_LOGD("tagreader", "Found Music Assistant tag NDEF");
-              id(source) = "mass";
-              id(url) = payload;
             }
             else if (type == "T" ) {
               ESP_LOGD("tagreader", "Found music info tag NDEF");
@@ -333,24 +288,12 @@ pn532_i2c:
           - homeassistant.tag_scanned: !lambda |-
               ESP_LOGD("tagreader", "No HA NDEF, using UID");
               return x;
-        else:
-        - if:
-            condition:
-              lambda: 'return ( id(source)=="hass" );'
-            then:
-            - homeassistant.tag_scanned: !lambda 'return id(info);'
-            else:
-            - homeassistant.event:
-                event: esphome.music_tag
-                data:
-                  reader: !lambda |-
-                    return App.get_name().c_str();
-                  source: !lambda |-
-                    return id(source);
-                  url: !lambda |-
-                    return id(url);
-                  info: !lambda |-
-                    return id(info);
+    - if:
+        condition:
+          lambda: 'return ( id(source)=="hass" );'
+        then:
+        - homeassistant.tag_scanned: !lambda 'return id(info);'
+
 
     - if:
         condition:
@@ -405,8 +348,47 @@ text_sensor:
 script:
   - id: update_state
     then:
-      - lambda: |-
-          auto state = id(alarm_state).state;
+      - if:
+          condition:
+            id: alarm_state.state
+            state: disarmed
+          then:
+            - dfplayer.stop
+            - dfplayer.play_mp3: 
+                file: 2
+
+      - if:
+          condition:
+            id: alarm_state.state
+            state: arming
+          then:
+            - dfplayer.stop
+            - dfplayer.play_mp3:
+                file: 1
+
+      - if:
+          any:
+            - alarm_state.state: armed_away
+            - alarm_state.state: armed_vacation
+          
+          then:
+            - dfplayer.stop
+            - dfplayer.play_mp3:
+                file: 4
+          
+
+      - if:
+          condition:
+            id: alarm_state.state
+            state: pending
+          then:
+            - dfplayer.stop
+            - dfplayer.play_mp3:
+                file: 3
+            
+
+
+          
 
 
 # Define buzzer as output for RTTTL
