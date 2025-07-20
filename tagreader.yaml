@@ -226,6 +226,8 @@ ota:
 i2c:
   scan: False
   frequency: 400kHz
+  scl: GPIO04
+  sda: GPIO05
 
 globals:
   - id: source
@@ -350,8 +352,9 @@ script:
     then:
       - if:
           condition:
-            id: alarm_state.state
-            state: disarmed
+            text_sensor.state:
+              id: alarm_state
+              state: disarmed
           then:
             - dfplayer.stop
             - dfplayer.play_mp3: 
@@ -359,8 +362,9 @@ script:
 
       - if:
           condition:
-            id: alarm_state.state
-            state: arming
+            text_sensor.state:
+              id: alarm_state
+              state: arming
           then:
             - dfplayer.stop
             - dfplayer.play_mp3:
@@ -368,8 +372,12 @@ script:
 
       - if:
           any:
-            - alarm_state.state: armed_away
-            - alarm_state.state: armed_vacation
+            - text_sensor.state:
+                id: alarm_state
+                state: armed_away
+            - text_sensor.state:
+                id: alarm_state
+                state: armed_vacation
           
           then:
             - dfplayer.stop
@@ -379,8 +387,9 @@ script:
 
       - if:
           condition:
-            id: alarm_state.state
-            state: pending
+            text_sensor.state:
+              id: alarm_state
+              state: pending
           then:
             - dfplayer.stop
             - dfplayer.play_mp3:
